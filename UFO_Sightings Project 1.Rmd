@@ -1,0 +1,84 @@
+---
+title: "UFO_sightings:Project 1"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+# data set is from Kaggle - https://www.kaggle.com/NUFORC/ufo-sightings
+
+Dataset represents unidentifed flying objects reports in the last century. We are using the scrubbed dataset that is available. There was also a complete dataset, but lacked information for some of the entries. The dataset divided by date, time, city, state, country, shape, description, and duration of each sighting. Most of the sighting seemed to be reported from USA, Canada, and Australia. 
+
+#Questions: 
+- What areas of the country are most likely to have UFO sightings?
+- Are there any trends in UFO sightings over time? Do they tend to be clustered or seasonal?
+- Do clusters of UFO sightings correlate with landmarks, such as airports or government research centers?
+- What are the most common UFO descriptions?
+- Is there a correlation between time and shape?  
+- Are certain shapes of the UFO more frequent in different countries and states in the US? 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+UFO <- read.csv(file.choose(), header = T)
+```
+
+# Structure of data
+```{r}
+str(UFO)
+head(UFO)
+tail(UFO)
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+UFO
+
+```
+# - Is there a significance when the sighting is seen? 
+```{r}
+time_sighting <- UFO[, "datetime"]
+
+summary(time_sighting, decreasing = TRUE)
+
+```
+
+#- Are certain shapes of the UFO more frequent in different countries? States in the US? 
+
+```{r}
+shape_country <- UFO[, c("shape", "country")]
+shape_country
+```
+
+```{r}
+usa <- filter(UFO, country=="us")
+plot(usa$shape, xlab="Shape", ylab="Number of Sightings", main="Prevalent UFO Shapes in the USA")
+
+
+canada <- filter(UFO, country=="ca")
+plot(canada$shape, xlab="Shape", ylab="Number of Sightings", main="Prevalent UFO Shapes in the Canada")
+
+au <- filter(UFO, country=="au")
+plot(au$shape, xlab="Shape", ylab="Number of Sightings", main="Prevalent UFO Shapes in the Australia")
+
+gb <- filter(UFO, country=="ca")
+plot(gb$shape, xlab="Shape", ylab="Number of Sightings", main="Prevalent UFO Shapes in the Great Britian")
+
+```
+# 
+```{r}
+usa <- filter(UFO, country=="us")
+us_state <- usa[, "state"]
+us_state
+
+summary(us_state)
+plot(us_state, xlab="States", ylab="Sightings", main="Sightings in US States")
+```
+
+
+
+
