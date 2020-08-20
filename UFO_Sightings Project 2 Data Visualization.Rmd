@@ -1,0 +1,130 @@
+---
+title: "UFO_sightings:Project 1"
+author: "Priti Rayamajhi"
+output: 
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+```{r setup, include=FALSE}
+ knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Context/Content : Data set is from Kaggle - https://www.kaggle.com/NUFORC/ufo-sightings
+
+Dataset represents unidentifed flying objects reports in the last century. We are using the scrubbed dataset that is available from Kaggle. There was also a complete dataset, but lacked information for some of the entries. The dataset includes 80,332 rows of observations with 11 columns. The columns are divided by date, time, city, state, country, shape, description, and duration of each sighting. 
+
+## Questions: 
+- Is there a correlation between time and shape? (Is there a significance when the sighting is seen and the shape of the UFO?) 
+- Are certain shapes of the UFO more frequent in different countries and states in the US? 
+
+```{r}
+# all the packages that I ran 
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(tidyr)
+library(readr)
+```
+
+
+```{r}
+UFO_sightings <- read_csv("scrubbed.csv")
+```
+
+```{r}
+# Structure of data
+
+str(UFO_sightings)
+head(UFO_sightings)
+tail(UFO_sightings)
+```
+
+# - Is there a significance when the sighting is seen and the shape of the UFO? (correlation between time and shape?)
+
+```{r}
+# Using the lubridate package, I wanted to turn the column "datetime" into date and time. This will make comaparing the shape with time easier since R can read the column as a date and time versus as a character like it was before.
+
+# This changes the "datetime" format from a character to read as date 
+
+UFO_new <- mutate(UFO_sightings, datetime = mdy_hm(UFO_sightings$datetime))
+
+# Added year and month columns separate from date into the dataset to be able to sort through quickly. 
+
+UFO_new <- mutate(UFO_new, year = year(datetime))
+UFO_new <- mutate(UFO_new, month = month(datetime, label = TRUE))
+
+UFO_new
+
+# looked at the patterns of the year to see what the sightings looked like annually in order to copare that to the shape 
+
+ggplot(data = UFO_new, mapping = aes(x = year)) + geom_freqpoly(bins = 1000) + ggtitle("Annual UFO Sightings Reported Worldwide")
+
+# The result show that as we get closer to the late 1900's and 2000's we see more sightings being reported. This might be due to many factors like technology or the population of the locations reporting more frequently than other locations. 
+
+```
+```{r}
+# Looked into what shapes are more frequent 
+
+Shape <- UFO_new[, "shape"]
+
+UFO_wo_shapes <- filter(UFO_new, shape!= c("other"))
+ # took out other in shapes 
+
+most_frequent_shapes <- names(sort(table(UFO_wo_shapes$shape),decreasing = TRUE)[1:10])
+most_frequent_shapes
+
+# most frequent shapes in the dataset
+
+ggplot(data = UFO_wo_shapes, mapping = aes(x=shape, y= 100)) + geom_bar( stat = "identity", fill="Pink") + labs( y= "Count", x= "shape") + ggtitle("Shapes of UFO Sightings")
+
+```
+
+```{r}
+ggplot(data = UFO_new) + geom_bar( mapping = aes(x= year, fill = shape)) + ggtitle ("Frequency of Shape by Year of Sighting")
+```
+
+
+```{r}
+# boxplot of the shapes grouped by the years
+g <- ggplot(UFO_new, aes(year, shape))
+g + geom_boxplot(varwidth=T, fill="plum") + 
+    labs(title="Box plot", 
+         subtitle="Shapes Grouped by the Year of Sighting",
+         x="Years",
+         y="Shapes")
+```
+
+
+
+#- Are certain shapes of the UFO more frequent in different countries? States in the US?
+```{r}
+usa <- filter(UFO_sightings, country=="us")
+plot(usa$shape, xlab="Shape", ylab="Number of Sightings", main="Prevalent UFO Shapes in the USA")
+
+canada <- filter(UFO_sightings, country=="ca")
+plot(canada$shape, xlab="Shape", ylab="Number of Sightings", main="Prevalent UFO Shapes in the Canada")
+
+au <- filter(UFO_sightings, country=="au")
+plot(au$shape, xlab="Shape", ylab="Number of Sightings", main="Prevalent UFO Shapes in the Australia")
+
+gb <- filter(UFO_sightings, country=="ca")
+plot(gb$shape, xlab="Shape", ylab="Number of Sightings", main="Prevalent UFO Shapes in the Great Britian")
+
+ggplot(data = canada) + geom_bar( mapping = aes(x= state, fill = shape))
+```
+# 
+```{r}
+usa <- filter(UFO_new, country=="us")
+us_state <- usa[, "state"]
+us_state
+
+summary(us_state)
+plot(us_state, xlab="States", ylab="Sightings", main="Sightings in US States")
+
+ggplot(data = usa) + geom_bar( mapping = aes(x= state, fill = shape))
+
+```
+
